@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>클래스온 홈페이지</title>
+<style>
+:root{--bg:#fff;--alt:#f6f6f8;--tx:#1d1d22;--sub:#7d7d89;--line:#e4e4ea;--pt:#ff6b4a;--ph:#ececf1;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17171b;--alt:#1e1e24;--tx:#f2f2f5;--sub:#9a9aa6;--line:#33333b;--ph:#2e2e36}}
+:root[data-theme="dark"]{--bg:#17171b;--alt:#1e1e24;--tx:#f2f2f5;--sub:#9a9aa6;--line:#33333b;--ph:#2e2e36}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;line-height:1.5}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5}
+header .wrap{display:flex;justify-content:space-between;align-items:center;min-height:56px;flex-wrap:wrap;gap:8px;padding-top:8px;padding-bottom:8px}
+.logo{font-weight:800;font-size:20px;cursor:pointer}.logo span{color:var(--pt)}
+button{font:inherit;cursor:pointer}
+.link{background:none;border:0;color:var(--sub);font-size:14px;margin-left:16px}
+.btn{background:var(--pt);color:#fff;border:0;border-radius:10px;padding:12px 20px;font-size:15px}
+.btn:disabled{opacity:.4;cursor:default}
+.hero{background:var(--alt);padding:56px 0 44px;text-align:center}
+.hero h1{font-size:clamp(26px,5vw,38px)}.hero p{color:var(--sub);margin:10px 0 22px}
+.bar{display:flex;gap:8px;max-width:640px;margin:0 auto;flex-wrap:wrap}
+input,select{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px;width:100%}
+.bar input{flex:1 1 220px;width:auto}
+section{padding:36px 0}
+h2{font-size:22px;margin-bottom:14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--tx);border-radius:20px;padding:7px 14px;font-size:14px}
+.chip.on{background:var(--pt);border-color:var(--pt);color:#fff}
+.chips select{width:auto;margin-left:auto;padding:7px 10px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.item{border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;background:var(--bg)}
+.item:hover{border-color:var(--pt)}
+.ph{height:120px;background:var(--ph);display:flex;align-items:center;justify-content:center;font-size:44px}
+.item .b{padding:12px}.item b{display:block}.item p{color:var(--sub);font-size:13px}
+.price{color:var(--tx)!important;font-weight:700;margin-top:4px}
+.tag{font-size:12px;color:var(--pt)}
+.empty{color:var(--sub);text-align:center;padding:40px 0;display:none}
+.steps{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));text-align:center}
+.steps i{display:flex;width:40px;height:40px;border-radius:50%;background:var(--pt);color:#fff;font-style:normal;align-items:center;justify-content:center;margin:0 auto 8px}
+.steps p{color:var(--sub);font-size:13px}
+.alt{background:var(--alt)}
+footer{border-top:1px solid var(--line);padding:24px 0;color:var(--sub);font-size:13px;text-align:center}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+.modal.on{display:flex}
+.box{background:var(--bg);border-radius:14px;padding:22px;width:100%;max-width:440px;max-height:90%;overflow-y:auto}
+.box h3{margin-bottom:4px}.box .sub{color:var(--sub);font-size:13px;margin-bottom:14px}
+label{display:block;font-size:13px;color:var(--sub);margin:10px 0 4px}
+.cnt{display:flex;align-items:center;gap:14px}
+.cnt button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--tx);font-size:18px}
+.total{display:flex;justify-content:space-between;font-weight:700;margin:16px 0 12px}
+.err{color:#e03e3e;font-size:13px;min-height:18px}
+.row2{display:flex;gap:8px}.row2 .btn{flex:1}
+.ghost{background:var(--alt);color:var(--tx)}
+.bk{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;font-size:14px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.bk small{color:var(--sub);display:block}
+.bk button{border:1px solid var(--line);background:var(--bg);color:var(--tx);border-radius:8px;padding:6px 10px;font-size:12px}
+.hr{display:flex;align-items:center;flex-wrap:wrap;gap:6px}#adm{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-left:12px}#adm input{width:112px;padding:7px 9px;font-size:13px}#adm .btn{padding:7px 12px;font-size:13px}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;display:none;z-index:30}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="logo" id="logo" title="메인으로">원데이<span>클래스</span></div>
+  <div class="hr"><button class="link" id="myBtn">내 예약</button><span id="adm"></span></div>
+</div></header>
+
+<div class="hero"><div class="wrap">
+  <h1>하루만에 배우는 나만의 취미</h1>
+  <p>원하는 클래스를 찾고 바로 신청하세요</p>
+  <div class="bar">
+    <input id="q" type="search" placeholder="클래스 이름 검색">
+    <button class="btn" id="sbtn">검색</button>
+  </div>
+</div></div>
+
+<section id="list"><div class="wrap">
+  <h2>클래스 찾기</h2>
+  <div class="chips" id="chips"></div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty">조건에 맞는 클래스가 없어요.</div>
+</div></section>
+
+<section class="alt"><div class="wrap">
+  <h2>이용 방법</h2>
+  <div class="steps">
+    <div><i>1</i><b>클래스 찾기</b><p>카테고리·검색으로 탐색</p></div>
+    <div><i>2</i><b>날짜 선택·신청</b><p>인원과 정보를 입력</p></div>
+    <div><i>3</i><b>수강</b><p>예약 내역에서 확인·취소</p></div>
+  </div>
+</div></section>
+<footer>© 클래스온 · 이용약관 · 개인정보처리방침</footer>
+
+<div class="modal" id="m1"><div class="box" id="b1"></div></div>
+<div class="modal" id="m2"><div class="box" id="b2"></div></div>
+<div id="toast"></div>
+
+<script>
+const CL=[
+{id:1,t:'지점토 키링 - 정은성',price:3000,seats:6,d:['10/18 14:00','10/25 14:00'],e:'🏺'},
+{id:2,t:'라떼류 - 심재성',cat:'공예',price:45000,seats:4,d:['10/19 11:00','10/26 11:00'],e:'👛'},
+{id:3,t:'후르츠산도 - 김준환',cat:'요리',price:70000,seats:8,d:['10/17 13:00','10/24 13:00'],e:'🧁'},
+{id:4,t:'커피 - 정현우',cat:'요리',price:60000,seats:5,d:['10/20 18:00'],e:'🍝'},
+{id:5,t:'미용 - 김예진',cat:'플라워',price:50000,seats:7,d:['10/18 16:00','10/25 16:00'],e:'💐'},
+{id:6,t:'미용 - 백재영',cat:'플라워',price:48000,seats:0,d:['10/21 15:00'],e:'🌾'},
+{id:7,t:'심리 기질 tci - 지한길',cat:'운동',price:35000,seats:10,d:['10/19 10:00','10/26 10:00'],e:'🧗'}];
+let bookings=[],cur=null,n=1;
+CL.forEach(c=>c.cap=c.seats);   // cap = 전체 정원, seats = 남은 자리
+try{bookings=JSON.parse(localStorage.getItem('bk')||'[]')}catch(e){}
+bookings.forEach(b=>{const c=CL.find(x=>x.id===b.cid);if(c)c.seats=Math.max(0,c.seats-b.n)});
+const $=id=>document.getElementById(id),won=v=>v.toLocaleString()+'원';
+function save(){try{localStorage.setItem('bk',JSON.stringify(bookings))}catch(e){}const a=$('allBtn');if(a)a.textContent='총 예약 ('+bookings.length+')'}
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hp=t=>{t='classon:'+t;let a=0xdeadbeef,b=0x41c6ce57;for(let i=0,c;i<t.length;i++){c=t.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677)}a=Math.imul(a^(a>>>16),2246822507)^Math.imul(b^(b>>>13),3266489909);b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);return(4294967296*(2097151&b)+(a>>>0)).toString(36)};
+const dg=t=>String(t).replace(/\D/g,'');
+function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);v===null?sessionStorage.removeItem(k):sessionStorage.setItem(k,v)}catch(e){}}
+function toast(t){const e=$('toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
+$('chips').innerHTML='<select id="sort"><option value="">추천순</option><option value="lo">낮은 가격순</option><option value="hi">높은 가격순</option></select>';
+$('sort').oninput=render;$('sbtn').onclick=render;$('q').onkeydown=e=>{if(e.key==='Enter')render()};
+$('logo').onclick=goHome;
+function goHome(){$('q').value='';$('sort').value='';document.querySelectorAll('.modal').forEach(m=>m.classList.remove('on'));render();window.scrollTo({top:0,behavior:'smooth'})}
+function render(){
+  const q=$('q').value.trim().toLowerCase(),s=$('sort').value;
+  let a=CL.filter(c=>(!q||c.t.toLowerCase().includes(q)));
+  if(s)a=[...a].sort((x,y)=>s==='lo'?x.price-y.price:y.price-x.price);
+  $('grid').innerHTML=a.map(c=>`<div class="item" data-id="${c.id}"><div class="ph">${c.e}</div><div class="b"><b>${c.t}</b><p>예약 ${c.cap-c.seats}/${c.cap}명${c.seats?'':' · 마감'}</p><p class="price">${won(c.price)}</p></div></div>`).join('');
+  $('empty').style.display=a.length?'none':'block';
+}
+$('grid').onclick=e=>{const i=e.target.closest('.item');if(i)openBook(+i.dataset.id)};
+function openBook(id){
+  cur=CL.find(c=>c.id===id);n=1;
+  $('b1').innerHTML=`<h3>${cur.e} ${cur.t}</h3><div class="sub">예약 ${cur.cap-cur.seats}/${cur.cap}명</div>
+  <label>날짜·시간</label><select id="fd">${cur.d.map(d=>`<option>${d}</option>`).join('')}</select>
+  <label>인원</label><div class="cnt"><button id="mn">−</button><b id="nn">1</b><button id="pl">+</button></div>
+  <label>이름</label><input id="fn" placeholder="홍길동">
+  <label>팀 이름 (선택)</label><input id="ft" placeholder="팀으로 신청하는 경우 입력" maxlength="30">
+  <label>연락처</label><input id="fp" type="tel" placeholder="010-0000-0000">
+  <label>예약 비밀번호 (숫자 4자리 · 내 예약 조회/취소용)</label><input id="fw" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off">
+  <div class="total"><span>결제 금액</span><span id="tt"></span></div><div class="err" id="er"></div>
+  <div class="row2"><button class="btn ghost" id="cx">닫기</button><button class="btn" id="sb" ${cur.seats?'':'disabled'}>${cur.seats?'신청하기':'마감되었습니다'}</button></div>`;
+  upd();$('m1').classList.add('on');
+  $('mn').onclick=()=>{n=Math.max(1,n-1);upd()};
+  $('pl').onclick=()=>{n=Math.min(cur.seats,n+1);upd()};
+  $('cx').onclick=()=>$('m1').classList.remove('on');
+  $('sb').onclick=submit;
+}
+function upd(){$('nn').textContent=n;$('tt').textContent=won(cur.price*n)}
+function submit(){
+  const nm=$('fn').value.trim(),ph=$('fp').value.trim();
+  if(!nm)return $('er').textContent='이름을 입력해주세요.';
+  if(!/^01\d[-\s]?\d{3,4}[-\s]?\d{4}$/.test(ph))return $('er').textContent='연락처를 올바르게 입력해주세요.';
+  const pin=$('fw').value.trim();if(!/^\d{4}$/.test(pin))return $('er').textContent='예약 비밀번호는 숫자 4자리로 입력해주세요.';
+  const pw=hp(pin),team=$('ft').value.trim().slice(0,30);bookings.push({k:Date.now(),cid:cur.id,d:$('fd').value,n,nm,team,ph,pw});ss('me',JSON.stringify({nm,ph,pw}));
+  cur.seats-=n;save();render();
+  $('m1').classList.remove('on');toast('신청이 완료되었습니다 ✓');
+}
+// ===== 내 예약 (본인만) / 총 예약 (관리자만) =====
+const ADMIN_ID='admin',ADMIN_PW='1234';   // ← 관리자 아이디/비밀번호 (여기서 바꾸세요)
+const isAdm=()=>ss('adm')==='1';
+const getMe=()=>{try{return JSON.parse(ss('me'))}catch(e){return null}};
+const row=(b,v)=>{const c=CL.find(x=>x.id===b.cid)||{t:'(삭제된 클래스)',price:0};return `<div class="bk"><div><b>${esc(c.t)}</b><small>${esc(b.d)} · ${b.n}명 · ${won(c.price*b.n)}</small><small>${esc(b.nm)}${b.team?' · 팀 '+esc(b.team):''} · ${esc(b.ph)}</small></div><button data-k="${b.k}" data-v="${v}">취소</button></div>`};
+const own=(b,me)=>!!me&&b.nm===me.nm&&dg(b.ph)===dg(me.ph)&&(b.pw===undefined||b.pw===me.pw);   // 이전 예약(비밀번호 없음)은 이름+연락처만 확인
+function cancelB(k){const i=bookings.findIndex(b=>b.k==k);if(i<0)return;const b=bookings[i],c=CL.find(x=>x.id===b.cid);if(c)c.seats+=b.n;bookings.splice(i,1);save();render();toast('예약이 취소되었습니다')}
+$('b2').onclick=e=>{const k=e.target.dataset.k;if(!k)return;const v=e.target.dataset.v,b=bookings.find(x=>x.k==k);
+  if(!b||(v==='all'?!isAdm():!own(b,getMe())))return toast('권한이 없습니다');
+  cancelB(k);v==='all'?openAll():openMy()};
+const close2='<button class="btn ghost" style="width:100%;margin-top:6px" id="c2">닫기</button>';
+function show2(){$('m2').classList.add('on');$('c2').onclick=()=>$('m2').classList.remove('on')}
+$('myBtn').onclick=openMy;
+function openMy(){
+  const me=getMe();
+  if(!me){
+    $('b2').innerHTML='<h3>내 예약 조회</h3><div class="sub">예약할 때 입력한 이름, 연락처, 예약 비밀번호가 모두 맞아야 내 예약만 볼 수 있어요.</div><label>이름</label><input id="mn2"><label>연락처</label><input id="mp2" type="tel" placeholder="010-0000-0000"><label>예약 비밀번호 (숫자 4자리)</label><input id="mw2" type="password" inputmode="numeric" maxlength="4" autocomplete="off"><div class="err" id="e2"></div><div class="row2"><button class="btn ghost" id="c2">닫기</button><button class="btn" id="ok2">조회</button></div>';
+    show2();
+    const go=()=>{const nm=$('mn2').value.trim(),ph=$('mp2').value.trim(),pin=$('mw2').value.trim();
+      if(!nm||!dg(ph)||!/^\d{4}$/.test(pin))return $('e2').textContent='이름, 연락처, 비밀번호(숫자 4자리)를 모두 입력해주세요.';
+      const m={nm,ph,pw:hp(pin)};
+      if(!bookings.some(b=>own(b,m)))return $('e2').textContent='일치하는 예약이 없어요. 입력한 정보를 다시 확인해주세요.';
+      ss('me',JSON.stringify(m));openMy()};
+    $('ok2').onclick=go;$('mw2').onkeydown=e=>{if(e.key==='Enter')go()};
+    return;
+  }
+  const mine=bookings.filter(b=>own(b,me));
+  $('b2').innerHTML=`<h3>내 예약</h3><div class="sub">${esc(me.nm)}님의 예약만 표시됩니다.</div>`+(mine.length?mine.map(b=>row(b,'my')).join(''):'<div class="empty" style="display:block">예약 내역이 없어요.</div>')+'<button class="btn ghost" style="width:100%;margin-top:6px" id="sw">조회 종료 (다른 사람으로 조회)</button>'+close2;
+  show2();$('sw').onclick=()=>{ss('me',null);openMy()};
+}
+function openAll(){
+  if(!isAdm())return;
+  const tot=bookings.reduce((a,b)=>{const c=CL.find(x=>x.id===b.cid);return a+(c?c.price*b.n:0)},0);
+  $('b2').innerHTML=`<h3>총 예약 (관리자)</h3><div class="sub">총 ${bookings.length}건 · 합계 ${won(tot)}</div>`+(bookings.length?[...bookings].reverse().map(b=>row(b,'all')).join(''):'<div class="empty" style="display:block">예약이 없어요.</div>')+(bookings.length?'<button class="btn" style="width:100%;margin-top:6px" id="dl">엑셀(.xlsx) 다운로드</button>':'')+close2;
+  show2();if($('dl'))$('dl').onclick=dlXlsx;
+}
+// ===== 엑셀(.xlsx) 만들기 (외부 라이브러리 없음) =====
+function crc32(u){let t=crc32.t;if(!t){t=crc32.t=[];for(let n=0,c;n<256;n++){c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}}let r=-1;for(let i=0;i<u.length;i++)r=t[(r^u[i])&255]^(r>>>8);return(r^-1)>>>0}
+function zip(files){
+  const enc=new TextEncoder(),parts=[],cd=[],u16=v=>[v&255,v>>8&255],u32=v=>[v&255,v>>8&255,v>>16&255,v>>>24&255];let off=0;
+  for(const [name,txt] of files){
+    const nb=enc.encode(name),d=enc.encode(txt),crc=crc32(d),h=new Uint8Array([0x50,0x4b,3,4,...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0x21),...u32(crc),...u32(d.length),...u32(d.length),...u16(nb.length),...u16(0)]);
+    parts.push(h,nb,d);
+    cd.push(new Uint8Array([0x50,0x4b,1,2,...u16(20),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0x21),...u32(crc),...u32(d.length),...u32(d.length),...u16(nb.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(off)]),nb);
+    off+=h.length+nb.length+d.length;
+  }
+  let cs=0;cd.forEach(x=>cs+=x.length);
+  const all=[...parts,...cd,new Uint8Array([0x50,0x4b,5,6,0,0,0,0,...u16(files.length),...u16(files.length),...u32(cs),...u32(off),0,0])];
+  let L=0;all.forEach(x=>L+=x.length);const r=new Uint8Array(L);let p=0;all.forEach(x=>{r.set(x,p);p+=x.length});return r;
+}
+function xlsx(rows){
+  const X='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',col=i=>String.fromCharCode(65+i),x=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const sh=rows.map((r,i)=>`<row r="${i+1}">`+r.map((v,j)=>typeof v==='number'?`<c r="${col(j)}${i+1}"><v>${v}</v></c>`:`<c r="${col(j)}${i+1}" t="inlineStr"><is><t xml:space="preserve">${x(v)}</t></is></c>`).join('')+'</row>').join('');
+  const R='http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  return zip([
+   ['[Content_Types].xml',X+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>'],
+   ['_rels/.rels',X+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="'+R+'/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+   ['xl/workbook.xml',X+'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="'+R+'"><sheets><sheet name="예약자" sheetId="1" r:id="rId1"/></sheets></workbook>'],
+   ['xl/_rels/workbook.xml.rels',X+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="'+R+'/worksheet" Target="worksheets/sheet1.xml"/></Relationships>'],
+   ['xl/worksheets/sheet1.xml',X+'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols><col min="1" max="1" width="7" customWidth="1"/><col min="2" max="9" width="20" customWidth="1"/></cols><sheetData>'+sh+'</sheetData></worksheet>']]);
+}
+function dlXlsx(){
+  if(!isAdm())return;
+  const p2=v=>String(v).padStart(2,'0'),fp=t=>{const d=dg(t);return d.length===11?d.replace(/(\d{3})(\d{4})(\d{4})/,'$1-$2-$3'):d.length===10?d.replace(/(\d{3})(\d{3})(\d{4})/,'$1-$2-$3'):t};
+  let pn=0,pa=0;
+  const rows=[['번호','신청일시','클래스','수강 일시','인원(명)','금액(원)','이름','팀 이름','연락처'],...bookings.map((b,i)=>{const c=CL.find(x=>x.id===b.cid)||{t:'(삭제된 클래스)',price:0},d=new Date(b.k),a=c.price*b.n;pn+=b.n;pa+=a;return [i+1,`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}`,c.t,b.d,b.n,a,b.nm,b.team||'',fp(b.ph)]})];
+  rows.push(['합계','','','',pn,pa,'','','']);
+  const d=new Date(),url=URL.createObjectURL(new Blob([xlsx(rows)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})),a=document.createElement('a');
+  a.href=url;a.download=`예약자_${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}.xlsx`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('엑셀 파일을 다운로드했습니다');
+}
+function admUI(){
+  if(isAdm()){
+    $('adm').innerHTML=`<button class="link" id="allBtn">총 예약 (${bookings.length})</button><button class="link" id="lo">로그아웃</button>`;
+    $('allBtn').onclick=openAll;
+    $('lo').onclick=()=>{ss('adm',null);admUI();$('m2').classList.remove('on')};
+  }else{
+    $('adm').innerHTML='<input id="aid" placeholder="관리자 아이디" autocomplete="off"><input id="apw" type="password" placeholder="비밀번호" autocomplete="off"><button class="btn" id="alg">로그인</button>';
+    const go=()=>{if($('aid').value.trim()===ADMIN_ID&&$('apw').value===ADMIN_PW){ss('adm','1');admUI();toast('관리자로 로그인했습니다')}else toast('아이디 또는 비밀번호가 틀렸습니다')};
+    $('alg').onclick=go;$('apw').onkeydown=e=>{if(e.key==='Enter')go()};
+  }
+}
+document.querySelectorAll('.modal').forEach(m=>m.onclick=e=>{if(e.target===m)m.classList.remove('on')});
+admUI();save();render();
+</script>
+</body>
+</html>
