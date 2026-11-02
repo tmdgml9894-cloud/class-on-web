@@ -98,7 +98,7 @@ label{display:block;font-size:13px;color:var(--sub);margin:10px 0 4px}
 
 <script>
 // ⭐ 구글 시트 앱스크립트 웹 앱 URL 입력
-const API_URL = "https://script.google.com/macros/s/AKfycbyDr-e3VXxz8-X58rBvP_QuSFV5mMNe6D4DrP5dsPFIQxitgOKNyQVtw0Xk_ZsAI8yS/exec";
+const API_URL = "여기에_웹앱_https://script.google.com/macros/s/AKfycbyDr-e3VXxz8-X58rBvP_QuSFV5mMNe6D4DrP5dsPFIQxitgOKNyQVtw0Xk_ZsAI8yS/exec";
 
 const CL=[
 {id:1,t:'지점토 키링 - 정은성',price:3000,seats:6,d:['10/18 14:00','10/25 14:00'],e:'🏺'},
@@ -111,6 +111,8 @@ const CL=[
 
 let cur=null,n=1;
 CL.forEach(c=>c.cap=c.seats);
+
+let cachedAdminList = []; // 엑셀 다운로드용 전체 예약 캐시
 
 const $=id=>document.getElementById(id),won=v=>v.toLocaleString()+'원';
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -132,7 +134,6 @@ async function api(payload) {
   }
 }
 
-// 🚀 접속하자마자 화면부터 즉시 띄우고, 백그라운드에서 잔여 인원 동기화
 async function updateCounts() {
   const res = await api({ a: 'counts' });
   if (res.counts) {
@@ -279,13 +280,56 @@ async function openAll(){
   const res = await api({ a: 'admin', aid: aid, apw: apw });
   if(res.error) { toast(res.error); return; }
 
-  const list = res.list || [];
-  const tot = list.reduce((a,b)=>a+b.amt,0);
+  cachedAdminList = res.list || [];
+  const tot = cachedAdminList.reduce((a,b)=>a+b.amt,0);
 
-  const rowsHtml = list.length ? [...list].reverse().map(b=>`<div class="bk"><div><b>${esc(b.cls)}</b><small>${esc(b.d)} · ${b.n}명 · ${won(b.amt)}</small><small>${esc(b.nm)}${b.team?' · 팀 '+esc(b.team):''} (${esc(b.at.substring(0,10))})</small></div><button data-id="${b.id}" data-adm="1">취소</button></div>`).join('') : '<div class="empty" style="display:block">예약이 없어요.</div>';
+  const rowsHtml = cachedAdminList.length ? [...cachedAdminList].reverse().map(b=>`<div class="bk"><div><b>${esc(b.cls)}</b><small>${esc(b.d)} · ${b.n}명 · ${won(b.amt)}</small><small>${esc(b.nm)}${b.team?' · 팀 '+esc(b.team):''} (${esc(b.at.substring(0,10))})</small></div><button data-id="${b.id}" data-adm="1">취소</button></div>`).join('') : '<div class="empty" style="display:block">예약이 없어요.</div>';
 
-  $('b2').innerHTML=`<h3>총 예약 (관리자)</h3><div class="sub">총 ${list.length}건 · 합계 ${won(tot)}</div>`+rowsHtml+close2;
+  const dlBtn = cachedAdminList.length ? '<button class="btn" style="width:100%;margin-top:6px" id="dl">엑셀(.xlsx) 다운로드</button>' : '';
+
+  $('b2').innerHTML=`<h3>총 예약 (관리자)</h3><div class="sub">총 ${cachedAdminList.length}건 · 합계 ${won(tot)}</div>`+rowsHtml+dlBtn+close2;
   show2();
+  
+  if($('dl')) $('dl').onclick = dlXlsx;
+}
+
+// ===== 엑셀(.xlsx) 파일 생성 기능 =====
+function crc32(u){let t=crc32.t;if(!t){t=crc32.t=[];for(let n=0,c;n<256;n++){c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}}let r=-1;for(let i=0;i<u.length;i++)r=t[(r^u[i])&255]^(r>>>8);return(r^-1)>>>0}
+function zip(files){
+  const enc=new TextEncoder(),parts=[],cd=[],u16=v=>[v&255,v>>8&255],u32=v=>[v&255,v>>8&255,v>>16&255,v>>>24&255];let off=0;
+  for(const [name,txt] of files){
+    const nb=enc.encode(name),d=enc.encode(txt),crc=crc32(d),h=new Uint8Array([0x50,0x4b,3,4,...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0x21),...u32(crc),...u32(d.length),...u32(d.length),...u16(nb.length),...u16(0)]);
+    parts.push(h,nb,d);
+    cd.push(new Uint8Array([0x50,0x4b,1,2,...u16(20),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0x21),...u32(crc),...u32(d.length),...u32(d.length),...u16(nb.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(off)]),nb);
+    off+=h.length+nb.length+d.length;
+  }
+  let cs=0;cd.forEach(x=>cs+=x.length);
+  const all=[...parts,...cd,new Uint8Array([0x50,0x4b,5,6,0,0,0,0,...u16(files.length),...u16(files.length),...u32(cs),...u32(off),0,0])];
+  let L=0;all.forEach(x=>L+=x.length);const r=new Uint8Array(L);let p=0;all.forEach(x=>{r.set(x,p);p+=x.length});return r;
+}
+function xlsx(rows){
+  const X='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',col=i=>String.fromCharCode(65+i),x=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const sh=rows.map((r,i)=>`<row r="${i+1}">`+r.map((v,j)=>typeof v==='number'?`<c r="${col(j)}${i+1}"><v>${v}</v></c>`:`<c r="${col(j)}${i+1}" t="inlineStr"><is><t xml:space="preserve">${x(v)}</t></is></c>`).join('')+'</row>').join('');
+  const R='http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  return zip([
+   ['[Content_Types].xml',X+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>'],
+   ['_rels/.rels',X+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="'+R+'/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+   ['xl/workbook.xml',X+'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="'+R+'"><sheets><sheet name="예약자" sheetId="1" r:id="rId1"/></sheets></workbook>'],
+   ['xl/_rels/workbook.xml.rels',X+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="'+R+'/worksheet" Target="worksheets/sheet1.xml"/></Relationships>'],
+   ['xl/worksheets/sheet1.xml',X+'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols><col min="1" max="1" width="7" customWidth="1"/><col min="2" max="9" width="20" customWidth="1"/></cols><sheetData>'+sh+'</sheetData></worksheet>']]);
+}
+function dlXlsx(){
+  if(!isAdm())return;
+  const p2=v=>String(v).padStart(2,'0');
+  let pn=0,pa=0;
+  const rows=[['번호','신청일시','클래스','수강 일시','인원(명)','금액(원)','이름','팀 이름'],...cachedAdminList.map((b,i)=>{
+    const d=new Date(b.at);
+    pn+=b.n; pa+=b.amt;
+    return [i+1, `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}`, b.cls, b.d, b.n, b.amt, b.nm, b.team||''];
+  })];
+  rows.push(['합계','','','',pn,pa,'','']);
+  const d=new Date(),url=URL.createObjectURL(new Blob([xlsx(rows)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})),a=document.createElement('a');
+  a.href=url;a.download=`예약자_${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}.xlsx`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('엑셀 파일을 다운로드했습니다');
 }
 
 function admUI(){
@@ -298,18 +342,16 @@ function admUI(){
     const go=()=>{
       if($('aid').value.trim()===ADMIN_ID&&$('apw').value===ADMIN_PW){
         ss('adm','1');admUI();toast('관리자로 로그인했습니다');openAll();
-      }else toast('아이디 또는 비밀번호가 틀렸습니다');
-    };
+      }else toast('아이디 또는 비밀번호가 틀렸습니다')};
     $('alg').onclick=go;$('apw').onkeydown=e=>{if(e.key==='Enter')go()};
   }
 }
 
 document.querySelectorAll('.modal').forEach(m=>m.onclick=e=>{if(e.target===m)m.classList.remove('on')});
 
-// 🚀 실행 즉시 화면에 클래스 목록을 먼저 띄우고, 시트 데이터는 백그라운드에서 동기화
 admUI();
-render();         // 즉시 렌더링
-updateCounts();   // 서버에서 최신 예약 인원 비동기 불러오기
+render();
+updateCounts();
 </script>
 </body>
 </html>
