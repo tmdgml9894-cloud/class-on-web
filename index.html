@@ -98,7 +98,7 @@ label{display:block;font-size:13px;color:var(--sub);margin:10px 0 4px}
 
 <script>
 // ⭐ 구글 시트 앱스크립트 웹 앱 URL 입력
-const API_URL = "https://script.google.com/macros/s/AKfycbzEnNvgk4pswGjPJmcJzfLXYvUT3TfWqJYrxuQjulxJi-0t6ExEDGjiEy3p4nBaaIU/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyDr-e3VXxz8-X58rBvP_QuSFV5mMNe6D4DrP5dsPFIQxitgOKNyQVtw0Xk_ZsAI8yS/exec";
 
 const CL=[
 {id:1,t:'지점토 키링 - 정은성',price:3000,seats:6,d:['10/18 14:00','10/25 14:00'],e:'🏺'},
@@ -168,7 +168,6 @@ function openBook(id){
   <label>인원</label><div class="cnt"><button id="mn">−</button><b id="nn">1</b><button id="pl">+</button></div>
   <label>이름</label><input id="fn" placeholder="홍길동">
   <label>팀 이름 (선택)</label><input id="ft" placeholder="팀으로 신청하는 경우 입력" maxlength="30">
-  <label>연락처</label><input id="fp" type="tel" placeholder="010-0000-0000">
   <label>예약 비밀번호 (숫자 4자리 · 내 예약 조회/취소용)</label><input id="fw" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off">
   <div class="total"><span>결제 금액</span><span id="tt"></span></div><div class="err" id="er"></div>
   <div class="row2"><button class="btn ghost" id="cx">닫기</button><button class="btn" id="sb" ${cur.seats?'':'disabled'}>${cur.seats?'신청하기':'마감되었습니다'}</button></div>`;
@@ -182,9 +181,8 @@ function openBook(id){
 function upd(){$('nn').textContent=n;$('tt').textContent=won(cur.price*n)}
 
 async function submit(){
-  const nm=$('fn').value.trim(),ph=$('fp').value.trim();
+  const nm=$('fn').value.trim();
   if(!nm)return $('er').textContent='이름을 입력해주세요.';
-  if(!/^01\d[-\s]?\d{3,4}[-\s]?\d{4}$/.test(ph))return $('er').textContent='연락처를 올바르게 입력해주세요.';
   const pin=$('fw').value.trim();
   if(!/^\d{4}$/.test(pin))return $('er').textContent='예약 비밀번호는 숫자 4자리로 입력해주세요.';
   
@@ -212,7 +210,7 @@ async function submit(){
     return;
   }
 
-  ss('me',JSON.stringify({nm, ph, pin}));
+  ss('me',JSON.stringify({nm, pin}));
   $('m1').classList.remove('on');
   toast('신청이 완료되었습니다 ✓');
   updateCounts();
@@ -227,18 +225,18 @@ $('myBtn').onclick=openMy;
 async function openMy(){
   const me=getMe();
   if(!me){
-    $('b2').innerHTML='<h3>내 예약 조회</h3><div class="sub">예약할 때 입력한 이름, 연락처, 예약 비밀번호를 모두 입력해주세요.</div><label>이름</label><input id="mn2"><label>연락처</label><input id="mp2" type="tel" placeholder="010-0000-0000"><label>예약 비밀번호 (숫자 4자리)</label><input id="mw2" type="password" inputmode="numeric" maxlength="4" autocomplete="off"><div class="err" id="e2"></div><div class="row2"><button class="btn ghost" id="c2">닫기</button><button class="btn" id="ok2">조회</button></div>';
+    $('b2').innerHTML='<h3>내 예약 조회</h3><div class="sub">예약할 때 입력한 이름과 예약 비밀번호를 입력해주세요.</div><label>이름</label><input id="mn2"><label>예약 비밀번호 (숫자 4자리)</label><input id="mw2" type="password" inputmode="numeric" maxlength="4" autocomplete="off"><div class="err" id="e2"></div><div class="row2"><button class="btn ghost" id="c2">닫기</button><button class="btn" id="ok2">조회</button></div>';
     show2();
     const go = async () => {
-      const nm=$('mn2').value.trim(),ph=$('mp2').value.trim(),pin=$('mw2').value.trim();
-      if(!nm||!dg(ph)||!/^\d{4}$/.test(pin))return $('e2').textContent='모든 정보를 올바르게 입력해주세요.';
+      const nm=$('mn2').value.trim(),pin=$('mw2').value.trim();
+      if(!nm||!/^\d{4}$/.test(pin))return $('e2').textContent='모든 정보를 올바르게 입력해주세요.';
       
       const res = await api({ a: 'mine', nm: nm, pin: pin });
       if(!res.list || res.list.length === 0) {
         $('e2').textContent='일치하는 예약이 없어요. 정보를 확인해주세요.';
         return;
       }
-      ss('me',JSON.stringify({nm, ph, pin}));
+      ss('me',JSON.stringify({nm, pin}));
       openMy();
     };
     $('ok2').onclick=go;$('mw2').onkeydown=e=>{if(e.key==='Enter')go()};
@@ -257,8 +255,16 @@ async function openMy(){
 }
 
 $('b2').onclick=async e=>{
-  const id=e.target.dataset.id;
+  const t=e.target,id=t.dataset.id;
   if(!id)return;
+  if(t.dataset.adm){
+    if(!isAdm())return toast('권한이 없습니다');
+    if(!t.dataset.c){t.dataset.c=1;t.textContent='정말 취소할까요?';t.style.background='#e03e3e';t.style.color='#fff';
+      setTimeout(()=>{if(t.isConnected){delete t.dataset.c;t.textContent='예약 취소';t.style.background='';t.style.color='#e03e3e'}},3000);return}
+    const r2=await api({ a:'cancel', id:id, aid:ADMIN_ID, apw:ADMIN_PW, adm:true });
+    if(r2.error){toast(r2.error);return}
+    toast('예약이 취소되었습니다.');updateCounts();openAll();return;
+  }
   const me=getMe();
   if(!me)return;
 
@@ -283,7 +289,7 @@ async function openAll(){
   cachedAdminList = res.list || [];
   const tot = cachedAdminList.reduce((a,b)=>a+b.amt,0);
 
-  const rowsHtml = cachedAdminList.length ? [...cachedAdminList].reverse().map(b=>`<div class="bk"><div><b>${esc(b.cls)}</b><small>${esc(b.d)} · ${b.n}명 · ${won(b.amt)}</small><small>${esc(b.nm)}${b.team?' · 팀 '+esc(b.team):''} (${esc(b.at.substring(0,10))})</small></div><button data-id="${b.id}" data-adm="1">취소</button></div>`).join('') : '<div class="empty" style="display:block">예약이 없어요.</div>';
+  const rowsHtml = cachedAdminList.length ? [...cachedAdminList].reverse().map(b=>`<div class="bk"><div><b>${esc(b.cls)}</b><small>${esc(b.d)} · ${b.n}명 · ${won(b.amt)}</small><small>${esc(b.nm)}${b.team?' · 팀 '+esc(b.team):''} (${esc(b.at.substring(0,10))})</small></div><button data-id="${b.id}" data-adm="1" style="color:#e03e3e;border-color:#e03e3e">예약 취소</button></div>`).join('') : '<div class="empty" style="display:block">예약이 없어요.</div>';
 
   const dlBtn = cachedAdminList.length ? '<button class="btn" style="width:100%;margin-top:6px" id="dl">엑셀(.xlsx) 다운로드</button>' : '';
 
