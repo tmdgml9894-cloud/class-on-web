@@ -167,7 +167,7 @@ function openBook(id){
   <label>날짜·시간</label><select id="fd">${cur.d.map(d=>`<option>${d}</option>`).join('')}</select>
   <label>인원</label><div class="cnt"><button id="mn">−</button><b id="nn">1</b><button id="pl">+</button></div>
   <label>이름</label><input id="fn" placeholder="홍길동">
-  <label>팀 이름 (선택)</label><input id="ft" placeholder="팀으로 신청하는 경우 입력" maxlength="30">
+  <label>팀 이름 (선택)</label><input id="ft" placeholder="팀 이름을 입력해주세요" maxlength="30">
   <label>예약 비밀번호 (숫자 4자리 · 내 예약 조회/취소용)</label><input id="fw" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off">
   <div class="total"><span>결제 금액</span><span id="tt"></span></div><div class="err" id="er"></div>
   <div class="row2"><button class="btn ghost" id="cx">닫기</button><button class="btn" id="sb" ${cur.seats?'':'disabled'}>${cur.seats?'신청하기':'마감되었습니다'}</button></div>`;
