@@ -32,7 +32,14 @@ h2{font-size:22px;margin-bottom:14px}
 .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
 .item{border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;background:var(--bg)}
 .item:hover{border-color:var(--pt)}
-.ph{height:120px;background:var(--ph);display:flex;align-items:center;justify-content:center;font-size:44px}
+.ph{height:140px;background:var(--ph);display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;overflow:hidden}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:var(--ph)}
+.dsc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:4px 0 6px}
+.mimg{margin:-22px -22px 14px;background:var(--ph)}
+.mimg img{width:100%;height:auto;max-height:60vh;object-fit:contain;display:block}
+.desc{font-size:14px;margin:10px 0 12px;white-space:pre-line}
+.info{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px;margin:0 0 6px;padding:12px;background:var(--alt);border-radius:10px}
+.info dt{color:var(--sub)}.info dd{margin:0}
 .item .b{padding:12px}.item b{display:block}.item p{color:var(--sub);font-size:13px}
 .price{color:var(--tx)!important;font-weight:700;margin-top:4px}
 .tag{font-size:12px;color:var(--pt)}
@@ -100,14 +107,39 @@ label{display:block;font-size:13px;color:var(--sub);margin:10px 0 4px}
 // ⭐ 구글 시트 앱스크립트 웹 앱 URL 입력
 const API_URL = "https://script.google.com/macros/s/AKfycbyDr-e3VXxz8-X58rBvP_QuSFV5mMNe6D4DrP5dsPFIQxitgOKNyQVtw0Xk_ZsAI8yS/exec";
 
+/* ====== 클래스 데이터 ======
+   각 클래스마다 아래 칸을 채우면 화면에 자동으로 표시됩니다. (비워두면 표시되지 않아요)
+   img   : 대표 이미지 (파일 경로 또는 URL)  예) 'images/class1.jpg'  /  'https://...jpg'
+   desc  : 클래스 소개 글 (줄바꿈은 \n)
+   time  : 소요 시간   예) '약 2시간'
+   place : 장소        예) '서울 마포구 OO스튜디오'
+   items : 준비물      예) '없음 (모든 재료 제공)'
+*/
 const CL=[
-{id:1,t:'지점토 키링 - 정은성',price:3000,seats:6,d:['10/18 14:00','10/25 14:00'],e:'🏺'},
-{id:2,t:'라떼류 - 심재성',cat:'공예',price:45000,seats:4,d:['10/19 11:00','10/26 11:00'],e:'👛'},
-{id:3,t:'후르츠산도 - 김준환',cat:'요리',price:70000,seats:8,d:['10/17 13:00','10/24 13:00'],e:'🧁'},
-{id:4,t:'커피 - 정현우',cat:'요리',price:60000,seats:5,d:['10/20 18:00'],e:'🍝'},
-{id:5,t:'미용 - 김예진',cat:'플라워',price:50000,seats:7,d:['10/18 16:00','10/25 16:00'],e:'💐'},
-{id:6,t:'미용 - 백재영',cat:'플라워',price:48000,seats:0,d:['10/21 15:00'],e:'🌾'},
-{id:7,t:'심리 기질 tci - 지한길',cat:'운동',price:35000,seats:10,d:['10/19 10:00','10/26 10:00'],e:'🧗'}];
+{id:1,t:'지점토 키링 - 정은성',price:3000,seats:20,d:['4부:11/15 15:10','5부:11/15 17:10'],e:'🏺',
+  img:'images/class1.jpg', desc:'가나다라', time:'', place:'', items:''},
+{id:2,t:'🍓 산도 비요리 (サンド日和) - 김준환',price:3000,seats:15,d:['4부:11/15 15:10','5부:11/15 17:10'],e:'🥪',
+  img:'images/class2.jpg', desc:'오늘은 조금 특별하고 달콤한 하루.\n일본 감성 가득한 후르츠산도를 직접 만들어 보는 시간입니다.\n폭신한 식빵 사이에 부드러운 생크림과 신선한 제철 과일을 차곡차곡 담아 나만의 예쁜 산도를 완성해 보아요.\n서툴러도 괜찮아요. 과일을 고르고, 크림을 채우고, 예쁜 단면을 마주하는 순간까지.\n소소하지만 기분 좋은 달콤함을 함께 만들어 봐요. ♡', time:'', place:'', items:''},
+{id:3,t:'나는 걸작품 - 김예진(여자)',price:3000,seats:5,d:['4부:11/15 15:10','4부:11/15 15:20','4부:11/15 15:30','4부:11/15 15:40','4부:11/15 15:50','5부:11/15 17:10','5부:11/15 17:20','5부:11/15 17:30','5부:11/15 17:40','5부:11/15 17:50'],e:'💅',
+  img:'images/class3-1.jpg', desc:'우리는 꾸미지 않아도 걸작품!\n그런데 매일매일 자라나는 머리카락은\n어떻게 관리해야할까?\n자르긴 잘라야하는 머리카락! 어떻게 잘라야하는지?\n손질은 어떻게 해야하는지?\n간단한 머리 손질 방법,\n두피타입별 샴푸 등을 소개합니다! ', time:'', place:'', items:''},
+{id:4,t:'나는 걸작품 - 백재영(남자)',price:3000,seats:5,d:['4부:11/15 15:10','4부:11/15 15:20','4부:11/15 15:30','4부:11/15 15:40','4부:11/15 15:50','5부:11/15 17:10','5부:11/15 17:20','5부:11/15 17:30','5부:11/15 17:40','5부:11/15 17:50'],e:'💄',
+  img:'images/class3-2.jpg', desc:'우리는 꾸미지 않아도 걸작품!\n그런데 매일매일 자라나는 머리카락은\n어떻게 관리해야할까?\n자르긴 잘라야하는 머리카락! 어떻게 잘라야하는지?\n손질은 어떻게 해야하는지?\n간단한 머리 손질 방법,\n두피타입별 샴푸 등을 소개합니다! ', time:'', place:'', items:''},
+{id:5,t:'심리 기질 tci - 지한길/김연우(예닮)',price:3000,seats:5,d:['4부:11/15 15:10','5부:11/15 17:10'],e:'🧠',
+  img:'images/class4.jpg', desc:'', time:'', place:'', items:''},
+{id:6,t:'왁뿌슬라임 만들기 - 김연우',price:3000,seats:10,d:['4부:11/15 15:10','5부:11/15 17:10'],e:'🫧',
+  img:'images/class5.jpg', desc:'', time:'', place:'', items:''},
+{id:7,t:'속눈썹 펌 - 임한나',price:3000,seats:5,d:['4부:11/15 15:10','5부:11/15 17:10'],e:'👁️',
+  img:'images/class6.jpg', desc:'', time:'', place:'', items:''},
+{id:8,t:'달콤바삭 빼빼로 공장 OPEN! - 박지민',price:3000,seats:20,d:['4부:11/15 15:10','5부:11/15 17:10'],e:'🍫',
+  img:'images/class7.jpg', desc:'앗, 아직도 빼빼로를 그냥 사서 드시나요?!\n올해는 우리가 직접 만들어서 선물하자!\n세상에 하나뿐인 나만의 개성 만점 빼빼로 만들기 대작전!\n맛있는 간식도 먹고, 예쁘게 포장도 하고.\n같이 만들고 싶은 사람들을 환영합니다!', time:'', place:'', items:''},
+{id:9,t:'AI 정보의 바다 속에서 살아남기 - 안형욱',price:0,seats:15,d:['4부:11/15 15:10','5부:11/15 17:10'],e:'🤖',
+  img:'images/class8.jpg', desc:'AI를 오직 채팅 및 검색으로만 쓰는 사람들이나 AI로 뭘 만들어보고 싶은데 정보가 너무 많아서 어떻게 시작할지 모르겠는 사람들에게 AI에 대한 오해를 풀고, AI를 어떻게 다뤄야 하는지를 배우고 직접 연습해 볼 수 있는 클래스\n⭐️ AI 초보자 입문자 환영 \n⭐️ 노트북 지참 추천', time:'', place:'', items:''},
+{id:10,t:'크리스마스 모빌 만들기 - 최성미',price:3000,seats:10,d:['4부:11/15 15:10','5부:11/15 17:10'],e:'🎄',
+  img:'images/class9.jpg', desc:'', time:'', place:'', items:''},
+{id:11,t:'보드게임 - 강모세',price:3000,seats:5,d:['4부:11/15 15:10','5부:11/15 17:10'],e:'🎲',
+  img:'images/class10.jpg', desc:'', time:'', place:'', items:''},
+{id:12,t:'보드게임 - 박병준',price:3000,seats:5,d:['4부:11/15 15:10','5부:11/15 17:10'],e:'♟️',
+  img:'images/class10-1.jpg', desc:'', time:'', place:'', items:''}];
 
 let cur=null,n=1;
 CL.forEach(c=>c.cap=c.seats);
@@ -155,7 +187,7 @@ function render(){
   const q=$('q').value.trim().toLowerCase(),s=$('sort').value;
   let a=CL.filter(c=>(!q||c.t.toLowerCase().includes(q)));
   if(s)a=[...a].sort((x,y)=>s==='lo'?x.price-y.price:y.price-x.price);
-  $('grid').innerHTML=a.map(c=>`<div class="item" data-id="${c.id}"><div class="ph">${c.e}</div><div class="b"><b>${c.t}</b><p>예약 ${c.cap-c.seats}/${c.cap}명${c.seats?'':' · 마감'}</p><p class="price">${won(c.price)}</p></div></div>`).join('');
+  $('grid').innerHTML=a.map(c=>`<div class="item" data-id="${c.id}"><div class="ph"><span>${c.e}</span>${c.img?`<img src="${esc(c.img)}" alt="${esc(c.t)}" loading="lazy" onerror="this.remove()">`:''}</div><div class="b"><b>${c.t}</b>${c.desc?`<p class="dsc">${esc(c.desc)}</p>`:''}<p>예약 ${c.cap-c.seats}/${c.cap}명${c.seats?'':' · 마감'}</p><p class="price">${won(c.price)}</p></div></div>`).join('');
   $('empty').style.display=a.length?'none':'block';
 }
 
@@ -163,11 +195,13 @@ $('grid').onclick=e=>{const i=e.target.closest('.item');if(i)openBook(+i.dataset
 
 function openBook(id){
   cur=CL.find(c=>c.id===id);n=1;
-  $('b1').innerHTML=`<h3>${cur.e} ${cur.t}</h3><div class="sub">예약 ${cur.cap-cur.seats}/${cur.cap}명</div>
+  const rows=[['소요 시간',cur.time],['장소',cur.place],['준비물',cur.items]].filter(r=>r[1]);
+  $('b1').innerHTML=`${cur.img?`<div class="mimg"><img src="${esc(cur.img)}" alt="${esc(cur.t)}" onerror="this.parentNode.remove()"></div>`:''}<h3>${cur.e} ${cur.t}</h3><div class="sub">예약 ${cur.cap-cur.seats}/${cur.cap}명</div>
+  ${cur.desc?`<div class="desc">${esc(cur.desc)}</div>`:''}${rows.length?`<dl class="info">${rows.map(r=>`<dt>${r[0]}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl>`:''}
   <label>날짜·시간</label><select id="fd">${cur.d.map(d=>`<option>${d}</option>`).join('')}</select>
   <label>인원</label><div class="cnt"><button id="mn">−</button><b id="nn">1</b><button id="pl">+</button></div>
   <label>이름</label><input id="fn" placeholder="홍길동">
-  <label>팀 이름 (선택)</label><input id="ft" placeholder="팀 이름을 입력해주세요" maxlength="30">
+  <label>팀 이름 (선택)</label><input id="ft" placeholder="팀으로 신청하는 경우 입력" maxlength="30">
   <label>예약 비밀번호 (숫자 4자리 · 내 예약 조회/취소용)</label><input id="fw" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off">
   <div class="total"><span>결제 금액</span><span id="tt"></span></div><div class="err" id="er"></div>
   <div class="row2"><button class="btn ghost" id="cx">닫기</button><button class="btn" id="sb" ${cur.seats?'':'disabled'}>${cur.seats?'신청하기':'마감되었습니다'}</button></div>`;
