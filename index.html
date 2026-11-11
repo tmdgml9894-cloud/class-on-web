@@ -142,7 +142,12 @@ const CL=[
   img:'images/class10-1.jpg', desc:'', time:'', place:'', items:''}];
 
 let cur=null,n=1;
-CL.forEach(c=>c.cap=c.seats);
+/* 정원(seats)은 '각 시간대마다' 적용됩니다. (예: seats:20 이면 4부 20명, 5부 20명) */
+CL.forEach(c=>{c.cap=c.seats;c.left={};c.d.forEach(d=>c.left[d]=c.cap)});
+const key=(c,d)=>c.id*100+c.d.indexOf(d)+1;                    // 시간대별 카운트 번호 (숫자) 예) 1번 클래스 첫 시간=101, 둘째=102
+const usedAll=c=>c.d.reduce((a,d)=>a+c.cap-c.left[d],0);        // 전체 예약 인원
+const totalCap=c=>c.cap*c.d.length;                             // 전체 정원
+const soldOut=c=>c.d.every(d=>c.left[d]<=0);                    // 모든 시간대 마감
 
 let cachedAdminList = []; // 엑셀 다운로드용 전체 예약 캐시
 
@@ -170,8 +175,10 @@ async function updateCounts() {
   const res = await api({ a: 'counts' });
   if (res.counts) {
     CL.forEach(c => {
-      const used = res.counts[c.id] || 0;
-      c.seats = Math.max(0, c.cap - used);
+      c.d.forEach(d => {
+        const used = res.counts[key(c,d)] || 0;
+        c.left[d] = Math.max(0, c.cap - used);
+      });
     });
     render();
   }
@@ -187,7 +194,7 @@ function render(){
   const q=$('q').value.trim().toLowerCase(),s=$('sort').value;
   let a=CL.filter(c=>(!q||c.t.toLowerCase().includes(q)));
   if(s)a=[...a].sort((x,y)=>s==='lo'?x.price-y.price:y.price-x.price);
-  $('grid').innerHTML=a.map(c=>`<div class="item" data-id="${c.id}"><div class="ph"><span>${c.e}</span>${c.img?`<img src="${esc(c.img)}" alt="${esc(c.t)}" loading="lazy" onerror="this.remove()">`:''}</div><div class="b"><b>${c.t}</b>${c.desc?`<p class="dsc">${esc(c.desc)}</p>`:''}<p>예약 ${c.cap-c.seats}/${c.cap}명${c.seats?'':' · 마감'}</p><p class="price">${won(c.price)}</p></div></div>`).join('');
+  $('grid').innerHTML=a.map(c=>`<div class="item" data-id="${c.id}"><div class="ph"><span>${c.e}</span>${c.img?`<img src="${esc(c.img)}" alt="${esc(c.t)}" loading="lazy" onerror="this.remove()">`:''}</div><div class="b"><b>${c.t}</b>${c.desc?`<p class="dsc">${esc(c.desc)}</p>`:''}<p>예약 ${usedAll(c)}/${totalCap(c)}명${soldOut(c)?' · 마감':''}</p><p class="price">${won(c.price)}</p></div></div>`).join('');
   $('empty').style.display=a.length?'none':'block';
 }
 
@@ -196,23 +203,32 @@ $('grid').onclick=e=>{const i=e.target.closest('.item');if(i)openBook(+i.dataset
 function openBook(id){
   cur=CL.find(c=>c.id===id);n=1;
   const rows=[['소요 시간',cur.time],['장소',cur.place],['준비물',cur.items]].filter(r=>r[1]);
-  $('b1').innerHTML=`${cur.img?`<div class="mimg"><img src="${esc(cur.img)}" alt="${esc(cur.t)}" onerror="this.parentNode.remove()"></div>`:''}<h3>${cur.e} ${cur.t}</h3><div class="sub">예약 ${cur.cap-cur.seats}/${cur.cap}명</div>
+  $('b1').innerHTML=`${cur.img?`<div class="mimg"><img src="${esc(cur.img)}" alt="${esc(cur.t)}" onerror="this.parentNode.remove()"></div>`:''}<h3>${cur.e} ${cur.t}</h3><div class="sub">시간대별 정원 ${cur.cap}명 · 시간마다 따로 마감돼요</div>
   ${cur.desc?`<div class="desc">${esc(cur.desc)}</div>`:''}${rows.length?`<dl class="info">${rows.map(r=>`<dt>${r[0]}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl>`:''}
-  <label>날짜·시간</label><select id="fd">${cur.d.map(d=>`<option>${d}</option>`).join('')}</select>
+  <label>날짜·시간</label><select id="fd">${cur.d.map(d=>`<option value="${esc(d)}" ${cur.left[d]?'':'disabled'}>${esc(d)} (${cur.cap-cur.left[d]}/${cur.cap}명${cur.left[d]?'':' · 마감'})</option>`).join('')}</select>
   <label>인원</label><div class="cnt"><button id="mn">−</button><b id="nn">1</b><button id="pl">+</button></div>
   <label>이름</label><input id="fn" placeholder="홍길동">
   <label>팀 이름 (선택)</label><input id="ft" placeholder="팀으로 신청하는 경우 입력" maxlength="30">
   <label>예약 비밀번호 (숫자 4자리 · 내 예약 조회/취소용)</label><input id="fw" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off">
   <div class="total"><span>결제 금액</span><span id="tt"></span></div><div class="err" id="er"></div>
-  <div class="row2"><button class="btn ghost" id="cx">닫기</button><button class="btn" id="sb" ${cur.seats?'':'disabled'}>${cur.seats?'신청하기':'마감되었습니다'}</button></div>`;
+  <div class="row2"><button class="btn ghost" id="cx">닫기</button><button class="btn" id="sb">신청하기</button></div>`;
+  const first=cur.d.find(d=>cur.left[d]>0);
+  if(first)$('fd').value=first;
+  $('fd').onchange=()=>{n=1;upd()};
   upd();$('m1').classList.add('on');
   $('mn').onclick=()=>{n=Math.max(1,n-1);upd()};
-  $('pl').onclick=()=>{n=Math.min(cur.seats,n+1);upd()};
+  $('pl').onclick=()=>{n=Math.min(slotLeft(),n+1);upd()};
   $('cx').onclick=()=>$('m1').classList.remove('on');
   $('sb').onclick=submit;
 }
 
-function upd(){$('nn').textContent=n;$('tt').textContent=won(cur.price*n)}
+const slotLeft=()=>cur.left[$('fd').value]||0;
+function upd(){
+  const L=slotLeft();
+  if(n>L)n=Math.max(1,L);
+  $('nn').textContent=n;$('tt').textContent=won(cur.price*n);
+  const b=$('sb');b.disabled=!L;b.textContent=L?'신청하기':'마감되었습니다';
+}
 
 async function submit(){
   const nm=$('fn').value.trim();
@@ -227,7 +243,7 @@ async function submit(){
 
   const res = await api({
     a: 'book',
-    cid: cur.id,
+    cid: key(cur,$('fd').value),   // 클래스+시간대 별로 따로 카운트 (숫자)
     cls: cur.t,
     d: $('fd').value,
     n: n,
